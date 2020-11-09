@@ -1,1 +1,1 @@
-web: FLASK_ENV=production flask run --port 80
+web: FLASK_ENV=production flask run
