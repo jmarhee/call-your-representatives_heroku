@@ -1,0 +1,49 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <title>
+      Call Your Representatives!
+    </title>
+    <script>
+        // if (location.protocol != 'https:')
+        // {
+        //  location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
+        // }
+    </script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://josephmarhee.com/assets/tachyons.css">
+    <script type="text/javascript"
+    src="https://media.twiliocdn.com/sdk/js/client/v1.3/twilio.min.js"></script>    
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js">
+    </script>
+    <script type="text/javascript">
+    </script>
+    <div id="fb-root"></div>
+
+</head>
+
+<body class="w-100 sans-serif">
+    <main>
+
+        <section class="phm phl-ns mw7 center pvxl">
+            {%block heading %}
+                <h2 class='ttu tracked'>Representatives serving {{location['name']}}, {{zipCode}}...</h2>
+            {% endblock %}
+
+            {%for r in representatives %}
+                {% set phone_number = r['phone'] %}
+                {% set p_phone = r['p_phone'] %}
+                <p class='f4 f3-ns lh-copy measure'>Your area is represented by <a href="{{r['urls']}}">{{r['name']}}</a> ({{r['party']}}) as your {{ r['office'] }}.</p>
+                <form action="/dialer" method="get">
+                    <input type="hidden" id="number" name="number" value="number:{{ phone_number }}"> 
+                    <input class='f5 f4-ns dim dib mtl br2 bg-white-10 ba b-red-40 blue-80 link pam call call-customer-button' type="submit" value="Call {{ r['name'] }} ({{ phone_number }})">
+                </form>
+
+                <br /><br /><hr /><br />
+            {%endfor%}
+        </section>
+  </main>
+
+</body>

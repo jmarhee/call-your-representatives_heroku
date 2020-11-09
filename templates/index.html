@@ -1,0 +1,70 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <title>
+      Call Your Representatives! | Home
+    </title>
+    <script>
+	// if (location.protocol != 'https:')
+	// {
+	//  location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
+	// }
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://josephmarhee.com/assets/tachyons.css">
+    <link rel="stylesheet" href="/css/extrastyles.css">
+
+    <style>
+      .cf:before, .cf:after {
+      content: " ";
+      display: table;
+      }
+      .cf:after {
+          clear: both;
+      }
+      .cf {
+          *zoom: 1;
+      }
+      .fl {
+          float: left;
+          display: inline;
+      }
+      .w-100 {
+          width: 100%;
+      }
+      .bg-light-gray {
+          background-color: #eee;
+      }
+      .bg-near-white {
+          background-color: #f4f4f4;
+      }
+      .tc {
+          text-align: center;
+      }
+      @media screen and (min-width: 30em) {
+          .w-50-ns {
+              width: 50%;
+          }
+      }
+    </style>
+<div id="fb-root"></div>
+</head>
+
+<body class="w-100 sans-serif">
+    <main>
+            <section class="phm phl-ns mw7 center pvxl">
+        <h1 class="ttu tracked">Call Your Representatives</h1>
+        <h3 class="ttu tracked">You should be able to access your legislators whether or not you have reliable phone access, rely on public computers, calls are a budget concern, etc.  Call your representatives for free, right here, from the browser.</h3>
+<br /><br />
+      <form action="/reps" method="POST">
+        <p class='f4 f3-ns lh-copy measure'>What's your zip code?</p>
+        <input class='f5 f4-ns dim dib mtl br2 bg-white-10 ba b-red-40 blue-80 textfield pam'type="text" name="zip_code" value=""><br><br>
+        <input class='f5 f4-ns dim dib mtl br2 bg-white-10 ba b-red-40 blue-80 link pam' type="submit" value="Submit">
+      </form>
+      <br /><br /><hr />
+      <p class='f5 f3-ns lh-copy measure'>Congressional Contact Data provided by <a href="https://developers.google.com/civic-information/docs/v2">Google Civic Information API</a></p>
+  </section>
+  </main>
+
+</body>
