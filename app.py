@@ -49,6 +49,7 @@ def randomword(length):
    return ''.join(random.choice(letters) for i in range(length))
 
 default_client = "call-your-representatives-%s" % (randomword(8))
+validation = default_client + "_" + randomword(20)
 
 def numberVerify(zipCode, unformatted_number):
     reps = get_reps(zipCode)
@@ -73,12 +74,6 @@ def reps():
     representatives = get_reps(zipCode)
     client = default_client
     return render_template('call.html', client=client, zipCode=zipCode, location=location_name, representatives=representatives)
-
-@app.route('/dialer', methods=['GET', 'POST'])
-def start_call():
-    phone = request.args.get('number')
-    client = "call-your-representatives-%s" % (randomword(8))
-    return render_template('dial.html', client=client, phone=phone)
 
 @app.route('/token', methods=['GET'])
 def get_token():

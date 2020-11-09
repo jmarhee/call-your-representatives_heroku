@@ -11,7 +11,42 @@
         //  location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
         // }
     </script>
+    <script src="https://media.twiliocdn.com/sdk/js/client/v1.3/twilio.min.js"></script>    
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js">
+    </script>
+    <script type="text/javascript">
 
+        function httpGet(Url)
+        {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open( "GET", Url, false ); // false for synchronous request
+            xmlHttp.send( null );
+            return xmlHttp.responseText;
+        }
+                
+        document.addEventListener('DOMContentLoaded', function() {
+            var token = httpGet("/token");
+                
+            Twilio.Device.setup(token, {debug: true});
+                        
+                
+            Twilio.Device.ready(function (device) {
+                $("#log").text("Client {{ client }} is ready");
+            });
+                
+            Twilio.Device.error(function (error) {
+                $("#log").text("Error: " + error.message);
+            });
+                
+            Twilio.Device.connect(function (conn) {
+                $("#log").text("Successfully established call");
+            });
+                
+            Twilio.Device.disconnect(function (conn) {
+                $("#log").text("Call ended");
+            });
+        });
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://josephmarhee.com/assets/tachyons.css">
     <script type="text/javascript"
@@ -31,18 +66,25 @@
             {%block heading %}
                 <h2 class='ttu tracked'>Representatives serving {{location['name']}}, {{zipCode}}...</h2>
             {% endblock %}
-
+            Dialer Status...<br />
+            <div id="log"></div>
+            <br /><br /><hr /><br />
             {%for r in representatives %}
                 {% set phone_number = r['phone'] %}
                 {% set p_phone = r['p_phone'] %}
+                {% set name = r['name'].replace(" ","_").lower() %}
+
                 <p class='f4 f3-ns lh-copy measure'>Your area is represented by <a href="{{r['urls']}}">{{r['name']}}</a> ({{r['party']}}) as your {{ r['office'] }}.</p>
-                <form action="/dialer" method="get">
-                    <input type="hidden" id="number" name="number" value="number:{{ phone_number }}"> 
-                    <input class='f5 f4-ns dim dib mtl br2 bg-white-10 ba b-red-40 blue-80 link pam call call-customer-button' type="submit" value="Call {{ r['name'] }} ({{ phone_number }})">
-                </form>
+                <button class='f5 f4-ns dim dib mtl br2 bg-white-10 ba b-red-40 blue-80 link pam call call-customer-button' onclick="params = { 'PhoneNumber': 'number:{{ phone_number }}' }; Twilio.Device.connect(params);">
+                    Start Call
+                </button>
+                <button class='f5 f4-ns dim dib mtl br2 bg-white-10 ba b-red-40 blue-80 link pam hangup hangup-button' onclick="Twilio.Device.disconnectAll();">
+                    Hangup
+                </button><br/><br/>
 
                 <br /><br /><hr /><br />
             {%endfor%}
+
         </section>
   </main>
 
