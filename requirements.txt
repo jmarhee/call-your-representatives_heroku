@@ -1,4 +1,5 @@
-flask
-requests
-twilio
-jsonify
+Flask==1.1.2
+gunicorn==20.0.4
+requests==2.24.0
+twilio==6.47.0
+jsonify==0.5

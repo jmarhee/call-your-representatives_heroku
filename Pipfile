@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+gunicorn = "==20.0.4"
+requests = "==2.24.0"
+twilio = "==6.47.0"
+jsonify = "==0.5"
+Flask = "==1.1.2"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"
