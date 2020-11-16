@@ -1,0 +1,39 @@
+{
+  "name": "Call Your Representatvies",
+  "description": "Twilio-powered app to locate and call your represenatives from the browser.",
+  "repository": "https://git-central.openfunction.co/public.engineering/call-your-representatives_heroku",
+  "logo": "https://www.pngitem.com/pimgs/m/217-2172854_transparent-telephone-icon-png-phone-vector-icon-png.png",
+  "keywords": ["python", "flask", "twilio"]
+  "buildpacks": [
+	{
+		"url":"https://github.com/heroku/heroku-buildpack-python"
+	}
+  ],
+ "env": {
+    "TWILIO_SID": {
+      "description": "Twilio string ID for account.",
+      "required": true,
+      "value": ""
+    },
+    "TWILIO_TWIML_SID": {
+      "description": "Twilio string ID for your TwiML app.",
+      "required": true,    
+      "value": ""
+    },
+    "TWILIO_TOKEN": {
+      "description": "Twilio API token for account.",
+      "required": true,    
+      "value": ""
+    },
+    "NUMBERS_OUTBOUND": {
+      "description": "Outgoing phone number for your Twilio app.",
+      "required": true,    
+      "value": ""
+    },
+    "GOOGLE_API_KEY": {
+      "description": "Google Civic API Key",
+      "required": true,    
+      "value": ""
+    }
+  }
+}
