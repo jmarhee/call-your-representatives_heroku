@@ -10,6 +10,7 @@ twilio = "==6.47.0"
 jsonify = "==0.5"
 Flask = "==1.1.2"
 Flask-API = "*"
+cryptography = "*"
 
 [dev-packages]
 
