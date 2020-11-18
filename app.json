@@ -12,28 +12,23 @@
  "env": {
     "TWILIO_SID": {
       "description": "Twilio string ID for account.",
-      "required": true,
-      "value": ""
+      "required": true
     },
     "TWILIO_TWIML_SID": {
       "description": "Twilio string ID for your TwiML app.",
-      "required": true,    
-      "value": ""
+      "required": true    
     },
     "TWILIO_TOKEN": {
       "description": "Twilio API token for account.",
-      "required": true,    
-      "value": ""
+      "required": true    
     },
     "NUMBERS_OUTBOUND": {
       "description": "Outgoing phone number for your Twilio app.",
-      "required": true,    
-      "value": ""
+      "required": true    
     },
     "GOOGLE_API_KEY": {
       "description": "Google Civic API Key",
-      "required": true,    
-      "value": ""
+      "required": true    
     }
   }
 }
