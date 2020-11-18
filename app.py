@@ -64,15 +64,12 @@ validation = default_client + "_" + randomword(20)
 
 def numberVerify(zipCode, unformatted_number):
     reps = get_reps(zipCode)
-    nums_found = []
     for r in reps:
         if unformatted_number in r['phone']:
-            nums_found.append(r['name'])
             photoUrl = r['photo']
-    if len(nums_found) != 0:
-        return { 'status': 'OK', 'number': unformatted_number, 'zipCode': zipCode, 'name': nums_found[0], 'photo': photoUrl }
-    else:
-        return { 'status': 'Invalid.' }
+            return { 'status': 'OK', 'number': unformatted_number, 'zipCode': zipCode, 'photo': photoUrl }
+        else:
+            return { 'status': 'Invalid.', 'number': NUMBERS_OUTBOUND }
 
 @app.route('/')
 def hello_world():
@@ -100,20 +97,24 @@ def call():
     """Returns TwiML instructions to Twilio's POST requests"""
     response = VoiceResponse()
     number = ""
+    zipCode = ""
     dict = request.form
     for value in dict:
         if dict[value].startswith('number'):
             number = dict[value].split(":")[-1]
         if dict[value].startswith('zipCode'):
             zipCode = dict[value].split(":")[-1]
-    number = request.args.get('number:%s' %(number)) or default_client
+    phone_number = number #or default_client
+    zip_code = zipCode
+    print(phone_number)
+    print(zip_code)
     # undecoded_phone = number
     # base64_bytes = undecoded_phone.encode('ascii')
     # message_bytes = base64.b64decode(base64_bytes)
     # phone_number = str(decrypt(message_bytes, FERNET_KEY)).replace("b'","").replace("'","")
-    if numberVerify(zipCode, number)['status'] == "OK":
-        dial = Dial(callerId=NUMBERS_OUTBOUND)
-        dial.number(numberVerify(zipCode, number)['number'])
-        return str(response.append(dial))
-    else:
-        return str(response.say("Invalid number.", voice='alice'))
+    dial = Dial(callerId=NUMBERS_OUTBOUND)
+    try:
+        dial.number(numberVerify(zip_code, phone_number)['number'])
+    except:
+        dial.number(NUMBERS_OUTBOUND)
+    return str(response.append(dial))
