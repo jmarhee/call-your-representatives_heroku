@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect
+from flask_api import status
 import os
 import requests
 from twilio.rest import Client
@@ -6,7 +7,8 @@ from twilio.jwt.client import ClientCapabilityToken
 from twilio.twiml.voice_response import VoiceResponse, Dial
 import urllib
 import base64
-import random, string
+import random, string, sys
+from cryptography.fernet import Fernet
 
 # Loading these variables will come from another module at some point.
 TWILIO_SID = os.environ['twilio_sid']
@@ -14,10 +16,17 @@ TWILIO_TOKEN = os.environ['twilio_token']
 TWILIO_TWIML_SID = os.environ['twilio_twiml_sid']
 NUMBERS_OUTBOUND = os.environ['numbers_outbound']
 GOOGLE_API_KEY = os.environ['GOOGLE_API_KEY']
+FERNET_KEY = Fernet.generate_key()
 
 app = Flask(__name__)
 
 # These will need to go into their own module at some point.
+def encrypt(message: bytes, key: bytes) -> bytes:
+    return Fernet(key).encrypt(message)
+
+def decrypt(token: bytes, key: bytes) -> bytes:
+    return Fernet(key).decrypt(token)
+
 def get_reps(zipCode):
     officials = []
     r = requests.get("https://www.googleapis.com/civicinfo/v2/representatives?address=%s&levels=country&levels=regional&roles=legislatorUpperBody&roles=legislatorLowerBody&offices=true&key=%s" % (zipCode, GOOGLE_API_KEY))
@@ -36,7 +45,9 @@ def get_reps(zipCode):
         p_unformatted_phone = urllib.parse.quote(unformatted_phone)
         p_name = urllib.parse.quote(name)
         urls = item['urls'][0]
-        officials.append({'name': name, 'office': office, 'phone': phone, 'unformatted_phone': unformatted_phone, 'urls': urls, 'party': party, 'photo': photo, 'p_phone': p_phone, 'p_unformatted_phone': p_unformatted_phone})
+        phone_unencoded = encrypt(phone.encode(), FERNET_KEY)
+        encrypted_phone = base64.b64encode(phone_unencoded).decode('ascii')
+        officials.append({'name': name, 'office': office, 'phone': phone, 'encrypted_phone': encrypted_phone, 'unformatted_phone': unformatted_phone, 'urls': urls, 'party': party, 'photo': photo, 'p_phone': p_phone, 'p_unformatted_phone': p_unformatted_phone})
     return officials
 
 def location(zipCode):
@@ -55,13 +66,13 @@ def numberVerify(zipCode, unformatted_number):
     reps = get_reps(zipCode)
     nums_found = []
     for r in reps:
-        if unformatted_number in r['unformatted_phone']:
+        if unformatted_number in r['phone']:
             nums_found.append(r['name'])
             photoUrl = r['photo']
     if len(nums_found) != 0:
-        return { 'status': 'OK', 'zipCode': zipCode, 'name': nums_found[0], 'photo': photoUrl }
+        return { 'status': 'OK', 'number': unformatted_number, 'zipCode': zipCode, 'name': nums_found[0], 'photo': photoUrl }
     else:
-        return { 'status': 'FAILED' }
+        return { 'status': 'Invalid.' }
 
 @app.route('/')
 def hello_world():
@@ -93,8 +104,16 @@ def call():
     for value in dict:
         if dict[value].startswith('number'):
             number = dict[value].split(":")[-1]
-    phone_number = request.args.get('number:%s' %(number)) or default_client
-    dial = Dial(callerId=NUMBERS_OUTBOUND)
-    print(number)
-    dial.number(number)
-    return str(response.append(dial))
+        if dict[value].startswith('zipCode'):
+            zipCode = dict[value].split(":")[-1]
+    number = request.args.get('number:%s' %(number)) or default_client
+    # undecoded_phone = number
+    # base64_bytes = undecoded_phone.encode('ascii')
+    # message_bytes = base64.b64decode(base64_bytes)
+    # phone_number = str(decrypt(message_bytes, FERNET_KEY)).replace("b'","").replace("'","")
+    if numberVerify(zipCode, number)['status'] == "OK":
+        dial = Dial(callerId=NUMBERS_OUTBOUND)
+        dial.number(numberVerify(zipCode, number)['number'])
+        return str(response.append(dial))
+    else:
+        return str(response.say("Invalid number.", voice='alice'))
