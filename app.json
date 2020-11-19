@@ -1,9 +1,9 @@
 {
   "name": "Call Your Representatvies",
   "description": "Twilio-powered app to locate and call your represenatives from the browser.",
-  "repository": "https://git-central.openfunction.co/public.engineering/call-your-representatives_heroku",
+  "repository": "https://github.com/public-engineering/call-your-representatives_heroku/",
   "logo": "https://www.pngitem.com/pimgs/m/217-2172854_transparent-telephone-icon-png-phone-vector-icon-png.png",
-  "keywords": ["python", "flask", "twilio"]
+  "keywords": ["python", "flask", "twilio"],
   "buildpacks": [
 	{
 		"url":"https://github.com/heroku/heroku-buildpack-python"
