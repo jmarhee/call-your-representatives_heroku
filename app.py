@@ -43,10 +43,6 @@ def get_reps(zipCode):
         name = item['name']
         office = r.json()['offices'][index]['name']
         party = item['party']
-        try:
-            photo = item['photoUrl']
-        except IndexError:
-            photo = "https://zebconference.com/wp-content/uploads/2018/07/Blank-Person-Image.png"
         phone = "+1" + item['phones'][0].replace("(", "").replace(")", "").replace("-", "").replace(" ", "")
         unformatted_phone = item['phones'][0]
         p_phone = urllib.parse.quote(phone)
@@ -56,7 +52,7 @@ def get_reps(zipCode):
         phone_unencoded = encrypt(phone.encode(), FERNET_KEY)
         encrypted_phone = base64.b64encode(phone_unencoded).decode('ascii')
         officials.append({'name': name, 'office': office, 'phone': phone, 'encrypted_phone': encrypted_phone,
-                          'unformatted_phone': unformatted_phone, 'urls': urls, 'party': party, 'photo': photo,
+                          'unformatted_phone': unformatted_phone, 'urls': urls, 'party': party,
                           'p_phone': p_phone, 'p_unformatted_phone': p_unformatted_phone})
     return officials
 
@@ -82,8 +78,7 @@ def numberVerify(zipCode, unformatted_number):
     reps = get_reps(zipCode)
     for r in reps:
         if unformatted_number in r['phone']:
-            photoUrl = r['photo']
-            return {'status': 'OK', 'number': unformatted_number, 'zipCode': zipCode, 'photo': photoUrl}
+            return {'status': 'OK', 'number': unformatted_number, 'zipCode': zipCode }
         else:
             return {'status': 'Invalid.', 'number': NUMBERS_OUTBOUND}
 
