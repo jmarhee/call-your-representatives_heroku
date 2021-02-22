@@ -38,7 +38,10 @@ def get_reps(zipCode):
         name = item['name']
         office = r.json()['offices'][index]['name']
         party = item['party']
-        photo = item['photoUrl']
+	if photoUrl in item:
+	        photo = item['photoUrl']
+	else:
+		photo = "https://zebconference.com/wp-content/uploads/2018/07/Blank-Person-Image.png"
         phone = "+1" + item['phones'][0].replace("(","").replace(")","").replace("-","").replace(" ","")
         unformatted_phone = item['phones'][0]
         p_phone = urllib.parse.quote(phone)
