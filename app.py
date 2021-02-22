@@ -20,16 +20,21 @@ FERNET_KEY = Fernet.generate_key()
 
 app = Flask(__name__)
 
+
 # These will need to go into their own module at some point.
 def encrypt(message: bytes, key: bytes) -> bytes:
     return Fernet(key).encrypt(message)
 
+
 def decrypt(token: bytes, key: bytes) -> bytes:
     return Fernet(key).decrypt(token)
 
+
 def get_reps(zipCode):
     officials = []
-    r = requests.get("https://www.googleapis.com/civicinfo/v2/representatives?address=%s&levels=country&levels=regional&roles=legislatorUpperBody&roles=legislatorLowerBody&offices=true&key=%s" % (zipCode, GOOGLE_API_KEY))
+    r = requests.get(
+        "https://www.googleapis.com/civicinfo/v2/representatives?address=%s&levels=country&levels=regional&roles=legislatorUpperBody&roles=legislatorLowerBody&offices=true&key=%s" % (
+            zipCode, GOOGLE_API_KEY))
     for index, item in enumerate(r.json()['officials']):
         if index == 2:
             index = -1
@@ -38,11 +43,11 @@ def get_reps(zipCode):
         name = item['name']
         office = r.json()['offices'][index]['name']
         party = item['party']
-        if photoUrl in item:
-	        photo = item['photoUrl']
-        else:
-                photo = "https://zebconference.com/wp-content/uploads/2018/07/Blank-Person-Image.png"
-        phone = "+1" + item['phones'][0].replace("(","").replace(")","").replace("-","").replace(" ","")
+        try:
+            photo = item['photoUrl']
+        except IndexError:
+            photo = "https://zebconference.com/wp-content/uploads/2018/07/Blank-Person-Image.png"
+        phone = "+1" + item['phones'][0].replace("(", "").replace(")", "").replace("-", "").replace(" ", "")
         unformatted_phone = item['phones'][0]
         p_phone = urllib.parse.quote(phone)
         p_unformatted_phone = urllib.parse.quote(unformatted_phone)
@@ -50,33 +55,43 @@ def get_reps(zipCode):
         urls = item['urls'][0]
         phone_unencoded = encrypt(phone.encode(), FERNET_KEY)
         encrypted_phone = base64.b64encode(phone_unencoded).decode('ascii')
-        officials.append({'name': name, 'office': office, 'phone': phone, 'encrypted_phone': encrypted_phone, 'unformatted_phone': unformatted_phone, 'urls': urls, 'party': party, 'photo': photo, 'p_phone': p_phone, 'p_unformatted_phone': p_unformatted_phone})
+        officials.append({'name': name, 'office': office, 'phone': phone, 'encrypted_phone': encrypted_phone,
+                          'unformatted_phone': unformatted_phone, 'urls': urls, 'party': party, 'photo': photo,
+                          'p_phone': p_phone, 'p_unformatted_phone': p_unformatted_phone})
     return officials
 
+
 def location(zipCode):
-    loc = requests.get("https://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=true&key=%s" % (zipCode, GOOGLE_API_KEY))
-    place = loc.json()['results'][0]['address_components'][2]['long_name'] + ", "+ loc.json()['results'][0]['address_components'][-2]['short_name']
-    return { "name": place }
+    loc = requests.get(
+        "https://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=true&key=%s" % (zipCode, GOOGLE_API_KEY))
+    place = loc.json()['results'][0]['address_components'][2]['long_name'] + ", " + \
+            loc.json()['results'][0]['address_components'][-2]['short_name']
+    return {"name": place}
+
 
 def randomword(length):
-   letters = string.ascii_lowercase
-   return ''.join(random.choice(letters) for i in range(length))
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(length))
+
 
 default_client = "call-your-representatives-%s" % (randomword(8))
 validation = default_client + "_" + randomword(20)
+
 
 def numberVerify(zipCode, unformatted_number):
     reps = get_reps(zipCode)
     for r in reps:
         if unformatted_number in r['phone']:
             photoUrl = r['photo']
-            return { 'status': 'OK', 'number': unformatted_number, 'zipCode': zipCode, 'photo': photoUrl }
+            return {'status': 'OK', 'number': unformatted_number, 'zipCode': zipCode, 'photo': photoUrl}
         else:
-            return { 'status': 'Invalid.', 'number': NUMBERS_OUTBOUND }
+            return {'status': 'Invalid.', 'number': NUMBERS_OUTBOUND}
+
 
 @app.route('/')
 def hello_world():
     return render_template('index.html')
+
 
 @app.route('/reps', methods=['GET', 'POST'])
 def reps():
@@ -84,7 +99,9 @@ def reps():
     location_name = location(zipCode)
     representatives = get_reps(zipCode)
     client = default_client
-    return render_template('call.html', client=client, zipCode=zipCode, location=location_name, representatives=representatives)
+    return render_template('call.html', client=client, zipCode=zipCode, location=location_name,
+                           representatives=representatives)
+
 
 @app.route('/token', methods=['GET'])
 def get_token():
@@ -94,6 +111,7 @@ def get_token():
     token = capability.to_jwt()
     # encoded = base64.encodestring(token)
     return token
+
 
 @app.route("/voice", methods=['POST'])
 def call():
@@ -107,7 +125,7 @@ def call():
             number = dict[value].split(":")[-1]
         if dict[value].startswith('zipCode'):
             zipCode = dict[value].split(":")[-1]
-    phone_number = number #or default_client
+    phone_number = number  # or default_client
     zip_code = zipCode
     print(phone_number)
     print(zip_code)
